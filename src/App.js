@@ -1,7 +1,6 @@
 import React from 'react';
 import { BrowserRouter as Router, Route, Link } from "react-router-dom";
 
-import logo from './logo.svg';
 import './App.css';
 import Footer from './components/Footer';
 import LearningWords from './components/LearningWords';

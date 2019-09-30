@@ -10,7 +10,8 @@ class WordsCategories extends React.Component{
     constructor(props){
         super(props);
         this.state = {
-            categories: []
+            categories: [],
+            userCategories: []
         }
     }
 
@@ -24,72 +25,47 @@ class WordsCategories extends React.Component{
                     id: doc.id,
                     ...doc.data()
                 }));
-                console.log(categories);
                 self.setState({categories: categories})
-            }))
+            }));
+        firebase
+            .firestore()
+            .collection('users').doc('iwujmIzUgBoM8qNPO6S5').get().then(function(doc) {
+                if (doc.exists) {
+                    self.setState({userCategories: doc.data().categoriesId})
+                } else {
+                    console.log("No such document!");
+                }
+            }).catch(function(error) {
+                console.log("Error getting document:", error);
+            });
     }
 
+    toggleUserCategory = (itemId) => {
+        let userCategories;
+        if (this.state.userCategories.includes(itemId)){
+            userCategories = this.state.userCategories.filter(item => item !== itemId);
+        } else {
+            userCategories = [itemId, ...this.state.userCategories];
+        }
+        this.setState({userCategories});
+        firebase
+            .firestore()
+            .collection('users').doc("iwujmIzUgBoM8qNPO6S5").set({
+            categoriesId: userCategories});
+    };
+
     render() {
-        console.log(this.categories)
-        // let categories = [
-        //     {name:'Топ 100', checked: true},
-        //     {name:'Топ 1000', checked: true},
-        //     {name:'Топ 3000', checked: false},
-        //     {name:'Базовые глаголы', checked: false},
-        //     {name:'Базовые слова', checked: false},
-        //     {name:'Семья', checked: true},
-        //     {name:'Кухня', checked: false},
-        //     {name:'Дни недели', checked: false},
-        //     {name:'Время', checked: true},];
-        // if (this.categories) {
-        //     let categoriesItems = this.categories.map((item) => {
-        //         return (
-        //             <div>
-        //                 <div className="category-item">
-        //                     <div className="category-item__icon"><img src="../../logo192.png"/></div>
-        //                     <div>{item.name}</div>
-        //                     {item.checked ? (
-        //                         <div className="category-item__check-icon"><Check/></div>
-        //                     ) : null}
-        //
-        //                 </div>
-        //             </div>
-        //         )
-        //     });
-        // }
-        // let databaseRef = database.collection('wordsCategories').get().then((res)=> {
-        //     console.log(res)
-        // });
-        // console.log()
         let categoriesItems;
-        // if (this.categories) {
-        //     categoriesItems = this.categories.map((item) => {
-        //         (
-        //             <div>
-        //                 <div className="category-item">
-        //                     <div className="category-item__icon"><img src="../../logo192.png"/></div>
-        //                     <div>{item.name}</div>
-        //                     {item.checked ? (
-        //                         <div className="category-item__check-icon"><Check/></div>
-        //                     ) : null}
-        //
-        //                 </div>
-        //             </div>
-        //         )
-        //     });
-        //     console.log(categoriesItems)
-        // }
         return (
             <div>
                 {this.state.categories.map((item) =>
                     (<div>
-                        <div className="category-item">
+                        <div className="category-item" onClick={this.toggleUserCategory.bind(this, item.id)}>
                             <div className="category-item__icon"><img src="../../logo192.png"/></div>
                             <div>{item.name}</div>
-                            {item.checked ? (
+                            {this.state.userCategories.includes(item.id) ? (
                                 <div className="category-item__check-icon"><Check/></div>
                             ) : null}
-
                         </div>
                     </div>)
                 )}
